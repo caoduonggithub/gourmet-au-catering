@@ -46,12 +46,7 @@
     }
 
     // check deadline
-    if (empty($_POST["deadline"])) {
-      $deadlineError = "Deadline is required !";
-    }
-    else {
-      $deadline = $_POST["deadline"];
-    }
+    $deadline = $_POST["deadline"];
   }
 
 
@@ -135,7 +130,7 @@
         <p>
           <input type="datetime-local" name="deadline" placeholder="Date and time"
           value="<?php echo $deadline ?>">
-          <span class="error-input">* <?php echo $deadlineError; ?></span>
+          <span class="error-input"><?php echo $deadlineError; ?></span>
         </p>
         <p>
           <input type="text" name="address" placeholder="Address" >
