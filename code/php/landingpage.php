@@ -51,6 +51,9 @@
     }
     else {
       $numOfPeo = $_POST["num-of-peo"];
+      if ($numOfPeo <= 0) {
+        $numOfPeoError = "Number of people must be more than 0 !";
+      }
     }
 
     // check deadline
@@ -159,12 +162,12 @@
         <p>
           <input type="datetime-local" name="deadline" placeholder="Date and time"
           min="<?php echo $current; ?>" value="<?php echo $deadline; ?>">
-          <span class="error-input"><?php echo $deadlineError; ?></span>
+          <span class="error-input">* <?php echo $deadlineError; ?></span>
         </p>
         <p>
           <input type="text" name="address" placeholder="Address" 
           value="<?php echo $address; ?>">
-          <span class="error-input">*<?php echo $addressError; ?></span>
+          <span class="error-input">* <?php echo $addressError; ?></span>
         </p>
         <textarea name="note" placeholder="Message \ Special requirements" 
         form="customer-order"><?php echo $note; ?></textarea>
