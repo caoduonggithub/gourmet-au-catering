@@ -1,17 +1,22 @@
 <?php 
   define ("MIN_RATION", 1);
 
-  $name = $phone = $address = $note = $deadline = "";
-  $numOfPeo = MIN_RATION;
+  // initial current time
   $date = date("Y-m-d");
   $time = date("h:i");
-  $deadline = $date."T".$time;
+  $current = $date."T".$time;
 
+  // initial value for inputs
+  $name = $phone = $address = $note = "";
+  $submit = "send message";
+  $numOfPeo = NAN;
+  $deadline = $current;
+
+  // initial value for error
   $nameError = $phoneError = $numOfPeoError = $addressError = $deadlineError = "";
 
-  if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
-
-    // check data
+  // check data when form is send
+  if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // check name
     if (empty($_POST["name"])) {
@@ -19,6 +24,9 @@
     }
     else {
       $name = filter($_POST["name"]);
+      if (!preg_match("/^[a-zA-Z-' ]*$/",$name)) {
+        $nameError = "Only letters and white space allowed";
+      }
     }
 
     // check phone
@@ -46,8 +54,26 @@
     }
 
     // check deadline
-    $deadline = $_POST["deadline"];
+    if (empty($_POST["deadline"])) {
+      $deadlineError = "Deadline is required !";
+    }
+    else {
+      $deadline = $_POST["deadline"];
+      $currentTime = strtotime($current);
+      $deadlineTime = strtotime($deadline);
+      if ($currentTime >= $deadlineTime) {
+        $deadlineError = "Can not delivery to the past !";
+      }
+    }
+
+    // check note
+    if (!empty($_POST["note"])) {
+      $note = filter($_POST["note"]);
+    }
   }
+
+  // insert to database, table "customer", table "custom_order"
+
 
 
 
@@ -70,7 +96,8 @@
 <body>
   <header>
     <nav>
-      <a href="#" class="nav-right">Gourmet au Catering</a>
+      <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" 
+        class="nav-right">Gourmet au Catering</a>
       <a href="#" class="nav-left">About</a>
       <a href="#" class="nav-left">Menu</a>
       <a href="#" class="nav-left">Contact</a>
@@ -115,31 +142,34 @@
       <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" 
         method="post" id="customer-order">
         <p>
-          <input type="text" name="name" placeholder="Name" >
+          <input type="text" name="name" placeholder="Name" 
+          value="<?php echo $name; ?>">
           <span class="error-input">* <?php echo $nameError; ?></span>
         </p>
         <p>
-          <input type="text" name="phone" placeholder="Phone" >
+          <input type="text" name="phone" placeholder="Phone" 
+          value="<?php echo $phone; ?>">
           <span class="error-input">* <?php echo $phoneError; ?></span>
         </p>
         <p>
           <input type="number" min="<?php echo MIN_RATION; ?>" name="num-of-peo" 
-          placeholder="How many people" >
+          placeholder="How many people" value="<?php echo $numOfPeo; ?>">
           <span class="error-input">* <?php echo $numOfPeoError; ?></span>
         </p>
         <p>
           <input type="datetime-local" name="deadline" placeholder="Date and time"
-          value="<?php echo $deadline ?>">
+          min="<?php echo $current; ?>" value="<?php echo $deadline; ?>">
           <span class="error-input"><?php echo $deadlineError; ?></span>
         </p>
         <p>
-          <input type="text" name="address" placeholder="Address" >
+          <input type="text" name="address" placeholder="Address" 
+          value="<?php echo $address; ?>">
           <span class="error-input">*<?php echo $addressError; ?></span>
         </p>
         <textarea name="note" placeholder="Message \ Special requirements" 
-        form="customer-order"></textarea>
+        form="customer-order"><?php echo $note; ?></textarea>
         <p>
-          <input type="submit" name = "submit" value="send message">
+          <input type="submit" name = "submit" value="<?php echo $submit; ?>">
         </p>
       </form>
     </div>
