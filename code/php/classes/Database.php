@@ -111,8 +111,4 @@
     }
   }
 
-
-
-  // $db = new Database();
-  // echo $db->toTable($db->tableCreateAdmin)->insertRow([0, 2, 1, date("y-m-d h:i:s")]);
  ?>
