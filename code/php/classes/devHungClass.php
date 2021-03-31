@@ -7,7 +7,7 @@
 
 
 
-  $c = new Customer("Ngộ không", "0962772226");
+  $c = new Customer("Hung", "0962772226");
   $c->createCustomer();
 
  ?>
