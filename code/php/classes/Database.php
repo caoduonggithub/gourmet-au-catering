@@ -1,5 +1,7 @@
 <?php 
   class Database {
+    use upercaseString;
+
   	private $serverName = "localhost";
   	private $userName = "root";
   	private $password = "";
@@ -27,9 +29,12 @@
   	}
 
   	public function insertRow(array $values): bool {
+      $newValues = $this->upercaseString($values);
+      
+      // insert data
       $sttm = $this->conn->prepare($this->prepareInsert());
       $typeStr = $this->changeColumnType();
-      $sttm->bind_param($typeStr, ...$values);
+      $sttm->bind_param($typeStr, ...$newValues);
       $result = $sttm->execute();
       return $result;
   	}
