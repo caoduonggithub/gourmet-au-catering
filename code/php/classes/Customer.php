@@ -14,6 +14,7 @@
       $this->phone = $phone;
     }
 
+    // insert data to table customer
     public function createCustomer(): bool {
       $details = $this->createDetails();
 

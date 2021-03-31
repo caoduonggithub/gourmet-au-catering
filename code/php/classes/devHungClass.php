@@ -4,10 +4,14 @@
   require "GLOBAL_CONSTANT.php";
   require "Database.php";
   require "Customer.php";
+  require "Menu.php";
+  require "Order.php";
 
 
+  $customer = new Customer("Hung", "0973593797");
+  $customer->createCustomer();
 
-  $c = new Customer("Hung", "0962772226");
-  $c->createCustomer();
+  $order = new Order(5, "address1", "note1", "2121-12-12 12:12:12");
+  $order->createOrder(new Customer("hung", "0973593797"), 1);
 
  ?>
