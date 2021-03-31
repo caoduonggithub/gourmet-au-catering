@@ -9,15 +9,15 @@
   	private $tableName = "";
   	private $conn = null;
 
-  	public $tableAdmin = "admin";
-  	public $tableCreateAdmin = "create_admin";
-  	public $tableCustomer = "customer";
-  	public $tableOrder = "customer_order";
-  	public $tableDeleteAdmin = "delete_admin";
-  	public $tableFood = "food";
-  	public $tableMenu = "menu";
-  	public $tableMenuFood = "menu_food";
-  	public $tableUpdateOrder = "update_order";
+  	public $tableAdmin = TAB_ADMIN;
+  	public $tableCreateAdmin = TAB_CREATE_ADMIN;
+  	public $tableDeleteAdmin = TAB_DELETE_ADMIN;
+  	public $tableCustomer = TAB_CUSTOMER;
+  	public $tableOrder = TAB_ORDER;
+  	public $tableUpdateOrder = TAB_UPDATE_ORDER;
+  	public $tableMenu = TAB_MENU;
+  	public $tableFood = TAB_FOOD;
+  	public $tableMenuFood = TAB_MENU_FOOD;
 
   	public function __construct() {
       $this->conn = new mysqli($this->serverName, $this->userName, $this->password, $this->dbName);
@@ -92,8 +92,11 @@
           $type = "i";
         }
         else if (($type === "varchar" || $type === "text") || 
-          ($type === "date" || $type === "timestamp")) {
+          ($type === "datetime" || $type === "timestamp")) {
           $type = "s";
+        }
+        else if ($type === "float") {
+          $type = "d";
         }
         $typeStr .= $type;
       }
