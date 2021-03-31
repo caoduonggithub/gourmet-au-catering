@@ -21,32 +21,33 @@
       $this->conn = new mysqli($this->serverName, $this->userName, $this->password, $this->dbName);
   	}
 
-  	public function toTable($tableName): Database {
+  	public function toTable(string $tableName): Database {
       $this->tableName = $tableName;
       return $this;
   	}
 
-  	public function insertRow($typeStr, $values): bool {
+  	public function insertRow(array $values): bool {
       $sttm = $this->conn->prepare($this->prepareInsert());
+      $typeStr = $this->changeColumnType();
       $sttm->bind_param($typeStr, ...$values);
       $result = $sttm->execute();
       return $result;
   	}
 
-  	public function getRows($condition = ""): Object {
-      if ($condition == "") {
+  	public function getRows(string $condition = ""): Object {
+      if ($condition == null) {
       	$sql = "SELECT * FROM " . $this->tableName;
       }
       else {
       	$sql = "SELECT * FROM " . $this->tableName . " WHERE " . $condition;
       }
       $result = $this->conn->query($sql);
-      print_r($result);
       return $result;
   	}
 
   	private function prepareInsert(): string {
       $result = $this->getColumnName();
+
   		$numOfColumns = $result->num_rows;
 
   		$columnNames = "(";
@@ -65,14 +66,48 @@
   		return $prepare;
   	}
 
-  	private function getColumnName(): Object {
+    private function getColumnName(): Object {
       $sql = "SELECT COLUMN_NAME 
-  			FROM INFORMATION_SCHEMA.COLUMNS 
-  			WHERE TABLE_NAME = '" . $this->tableName . "' AND NOT COLUMN_NAME = 'id'
-  			ORDER BY ORDINAL_POSITION";
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = '" . $this->tableName . "' 
+        ORDER BY ORDINAL_POSITION";
 
-  		$result = $this->conn->query($sql);
-  		return $result;
-  	}
+      $result = $this->conn->query($sql);
+      return $result;
+    }    
+
+    private function changeColumnType(): string {
+      $result = $this->getColumnType();
+
+      $typeStr = "";
+
+      while ($row = $result->fetch_object()) {
+        $type = $row->DATA_TYPE;
+        if ($type === "int" || $type === "tinyint") {
+          $type = "i";
+        }
+        else if (($type === "varchar" || $type === "text") || 
+          ($type === "date" || $type === "timestamp")) {
+          $type = "s";
+        }
+        $typeStr .= $type;
+      }
+      return $typeStr;
+    }
+
+    private function getColumnType(): Object {
+      $sql = "SELECT DATA_TYPE 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = '" . $this->tableName . "' 
+        ORDER BY ORDINAL_POSITION";
+
+      $result = $this->conn->query($sql);
+      return $result;
+    }
   }
+
+
+
+  // $db = new Database();
+  // echo $db->toTable($db->tableCreateAdmin)->insertRow([0, 2, 1, date("y-m-d h:i:s")]);
  ?>
