@@ -15,7 +15,7 @@
     private $createAt;
 
     public function __construct(int $adminId, string $name, string $description, 
-    	string $menuImg, int $valueNum, int $id = 0, bool $isActive = true, 
+    	string $menuImg, int $id = 0, bool $isActive = true, float $valueNum = 0,
     	string $valueUnit = MONEY_UNIT, $createAt = "") {
 
     	$this->id = $id;
@@ -28,18 +28,22 @@
     	$this->valueUnit = $valueUnit;
     }
 
+    // insert data to table menu
     public function createMenu(): bool {
 
     	if ($this->checkUniqueName()) {
 
-    		// insert to table menu
-    		$this->createAt = date("y-m-d h:i:s");
-    	  $details = $this->createDetails();
+    	  // change is_active's value of all rows to false
+    	  $condition = COL_IS_ACTIVE . " = " . MY_TRUE;
     	  $db = new Database();
-    	  $db->toTable($db->tableMenu)->inserRow($details);
+    	  $db->toTable($db->tableMenu)->updateRow([COL_IS_ACTIVE], [MY_FALSE], $condition);
 
-    	  // change is_active's value of other rows to false
+    	  // insert new menu (price = 0) to table menu
+    	  $this->createAt = date("y-m-d h:i:s");
 
+    	  $details = $this->createDetails();
+    	  $result = $db->insertRow($details);
+    	  return $result;
     	}
     	else {
     		return false;
@@ -49,7 +53,7 @@
    	// check rule: menu's name is unique
     private function checkUniqueName(): bool {
     	$name = $this->name;
-    	$condition = COL_NAME . " = " . $name;
+    	$condition = COL_NAME . " = '" . $name . "'";
     	$db = new Database();
     	$result = $db->toTable($db->tableMenu)->getRows($condition);
       if ($result->num_rows > 0) {
@@ -60,6 +64,7 @@
       }
     }
 
+    // check rule: menu must being active to order
     public static function checkIsActive(int $menuId): bool {
       $db = new Database();
       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);
@@ -78,6 +83,7 @@
       }
     }
 
+    // check the price of menu
     public static function checkValueNum(int $menuId): int {
       $db = new Database();
       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);

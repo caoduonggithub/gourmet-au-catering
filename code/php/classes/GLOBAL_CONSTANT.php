@@ -14,7 +14,12 @@
   define("COL_ID", "id");
   define("COL_NAME", "name");
   define("COL_PHONE", "phone");
+  define("COL_IS_ACTIVE", "is_active");
 
   // define column value
   define("MONEY_UNIT", "$");
+
+  // define other value
+  define("MY_TRUE", 1);
+  define("MY_FALSE", 0);
  ?>

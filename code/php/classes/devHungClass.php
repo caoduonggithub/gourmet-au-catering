@@ -16,4 +16,7 @@
 
 	// $db = new Database();
 	// $db->toTable($db->tableCustomer)->updateRow(['name'], ["'Hung'"], "id = '38'");
+
+	// $menu = new Menu(2, "menu2", '', "img2");
+	// $menu->createMenu();
  ?>
