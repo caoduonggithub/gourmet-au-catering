@@ -32,7 +32,7 @@
     }
 
     // insert data to table customer_order
-    public function createOrder(Customer $customer, $menuId): bool {
+    public function createOrder(Customer $customer, int $menuId): bool {
       // get customer's id
       $customerId;
       $result1 = $customer->getCustomer();
