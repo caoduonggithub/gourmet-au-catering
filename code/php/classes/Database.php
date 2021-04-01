@@ -39,6 +39,7 @@
       return $result;
   	}
 
+    // get data
   	public function getRows(string $condition = ""): Object {
       if ($condition == null) {
       	$sql = "SELECT * FROM " . $this->tableName;
@@ -49,6 +50,26 @@
       $result = $this->conn->query($sql);
       return $result;
   	}
+
+    // update data
+    // if $values contains string value, that value must be endclose "" or '' 
+    public function updateRow(array $columns, array $values, string $condition): bool {
+      $len = count($columns);
+
+      if ($len == count($values)) {
+        $sql = "";
+        for ($i=0; $i < $len; $i++) { 
+          $sql .= $columns[$i] . " = " . $values[$i] . ", ";
+        }
+        $sql = chop($sql, ", ");
+      }
+
+      $sql = "UPDATE " . $this->tableName . 
+      " SET " . $sql . 
+      "WHERE " . $condition;
+      $result = $this->conn->query($sql);
+      return $result;
+    }
 
   	private function prepareInsert(): string {
       $result = $this->getColumnName();

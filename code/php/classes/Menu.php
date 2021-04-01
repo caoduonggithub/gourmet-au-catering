@@ -12,7 +12,53 @@
     private $isActive;
     private $valueNum;
     private $valueUnit;
+    private $createAt;
 
+    public function __construct(int $adminId, string $name, string $description, 
+    	string $menuImg, int $valueNum, int $id = 0, bool $isActive = true, 
+    	string $valueUnit = MONEY_UNIT, $createAt = "") {
+
+    	$this->id = $id;
+    	$this->adminId = $adminId;
+    	$this->name = $name;
+    	$this->description = $description;
+    	$this->menuImg = $menuImg;
+    	$this->isActive = $isActive;
+    	$this->valueNum = $valueNum;
+    	$this->valueUnit = $valueUnit;
+    }
+
+    public function createMenu(): bool {
+
+    	if ($this->checkUniqueName()) {
+
+    		// insert to table menu
+    		$this->createAt = date("y-m-d h:i:s");
+    	  $details = $this->createDetails();
+    	  $db = new Database();
+    	  $db->toTable($db->tableMenu)->inserRow($details);
+
+    	  // change is_active's value of other rows to false
+
+    	}
+    	else {
+    		return false;
+    	}
+    }
+
+   	// check rule: menu's name is unique
+    private function checkUniqueName(): bool {
+    	$name = $this->name;
+    	$condition = COL_NAME . " = " . $name;
+    	$db = new Database();
+    	$result = $db->toTable($db->tableMenu)->getRows($condition);
+      if ($result->num_rows > 0) {
+      	return false;
+      }  	
+      else {
+      	return true;
+      }
+    }
 
     public static function checkIsActive(int $menuId): bool {
       $db = new Database();
