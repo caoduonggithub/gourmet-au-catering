@@ -20,6 +20,7 @@
   define("MONEY_UNIT", "$");
 
   // define other value
+  define("VALUE_NUM", 1.1);
   define("MY_TRUE", 1);
   define("MY_FALSE", 0);
  ?>

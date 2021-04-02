@@ -15,7 +15,7 @@
     private $createAt;
 
     public function __construct(int $adminId, string $name, string $description, 
-    	string $menuImg, int $id = 0, bool $isActive = true, float $valueNum = 0,
+    	string $menuImg, int $id = 0, bool $isActive = true, float $valueNum = VALUE_NUM,
     	string $valueUnit = MONEY_UNIT, $createAt = "") {
 
     	$this->id = $id;
@@ -36,9 +36,9 @@
     	  // change is_active's value of all rows to false
     	  $condition = COL_IS_ACTIVE . " = " . MY_TRUE;
     	  $db = new Database();
-    	  $db->toTable($db->tableMenu)->updateRow([COL_IS_ACTIVE], [MY_FALSE], $condition);
+    	  $db->toTable($db->tableMenu)->updateRows([COL_IS_ACTIVE], [MY_FALSE], $condition);
 
-    	  // insert new menu (price = 0) to table menu
+    	  // insert new row (price = VALUE_NUM) to table menu
     	  $this->createAt = date("y-m-d h:i:s");
 
     	  $details = $this->createDetails();
@@ -50,7 +50,7 @@
     	}
     }
 
-   	// check rule: menu's name is unique
+   	// check rule: menu's name must be unique
     private function checkUniqueName(): bool {
     	$name = $this->name;
     	$condition = COL_NAME . " = '" . $name . "'";
@@ -64,7 +64,7 @@
       }
     }
 
-    // check rule: menu must being active to order
+    // check rule: this menu must being active to order
     public static function checkIsActive(int $menuId): bool {
       $db = new Database();
       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);
@@ -83,14 +83,17 @@
       }
     }
 
-    // check the price of menu
-    public static function checkValueNum(int $menuId): int {
+    // check the price of active menu
+    public static function checkValueNumOfActiveMenu(int $menuId): float {
       $db = new Database();
       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);
       if ($result->num_rows == 1) {
       	$row = $result->fetch_object();
-      	$valueNum = $row->value_num;
-      	return $valueNum;
+      	if ($row->is_active) {
+      		$valueNum = $row->value_num;
+      		return $valueNum;
+      	}
+      	else return 0;
       }
       else {
       	return 0;

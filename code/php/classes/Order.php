@@ -16,7 +16,7 @@
     private $orderAt;
 
     public function __construct(int $numOfPeo, string $address, string $note, string $deadline, 
-    	int $id = 0, int $customerId = 0, int $menuId = 0, float $valueNum = 0, 
+    	int $id = 0, int $customerId = 0, int $menuId = 0, float $valueNum = VALUE_NUM, 
     	string $valueUnit = MONEY_UNIT, string $orderAt = "") { 
 
     	$this->id = $id;
@@ -33,12 +33,12 @@
 
     // insert data to table customer_order
     public function createOrder(Customer $customer, int $menuId): bool {
+
       // get customer's id
-      $customerId;
       $result1 = $customer->getCustomer();
       if ($result1->num_rows == 1) {
         $row = $result1->fetch_object();
-        $customerId = $row->id;
+        $this->customerId = $row->id;
       }
       else {
       	return false;
@@ -46,10 +46,10 @@
 
       // get menu's id which is active
       $result2 = Menu::checkIsActive($menuId);
+
       if ($result2) {
-      	$this->customerId = $customerId;
       	$this->menuId = $menuId;
-      	$this->valueNum = Menu::checkValueNum($menuId)*$this->numOfPeo;
+      	$this->valueNum = Menu::checkValueNumOfActiveMenu($menuId)*$this->numOfPeo;
       	$this->orderAt = date("y-m-d h:i:s");
 
         // insert data to table customer_order
