@@ -53,7 +53,7 @@
 
     // update data
     // if $values contains string value, that value must be endclose "" or '' 
-    public function updateRow(array $columns, array $values, string $condition): bool {
+    public function updateRows(array $columns, array $values, string $condition): bool {
       $len = count($columns);
 
       if ($len == count($values)) {
@@ -62,13 +62,15 @@
           $sql .= $columns[$i] . " = " . $values[$i] . ", ";
         }
         $sql = chop($sql, ", ");
+        $sql = "UPDATE " . $this->tableName . 
+        " SET " . $sql . 
+        " WHERE " . $condition;
+        $result = $this->conn->query($sql);
+        return $result;
       }
-
-      $sql = "UPDATE " . $this->tableName . 
-      " SET " . $sql . 
-      "WHERE " . $condition;
-      $result = $this->conn->query($sql);
-      return $result;
+      else {
+        return false;
+      }
     }
 
   	private function prepareInsert(): string {

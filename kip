@@ -1,0 +1,202 @@
+[1mdiff --git a/code/php/classes/Database.php b/code/php/classes/Database.php[m
+[1mindex 61345d5..7332227 100644[m
+[1m--- a/code/php/classes/Database.php[m
+[1m+++ b/code/php/classes/Database.php[m
+[36m@@ -53,7 +53,7 @@[m
+ [m
+     // update data[m
+     // if $values contains string value, that value must be endclose "" or '' [m
+[31m-    public function updateRow(array $columns, array $values, string $condition): bool {[m
+[32m+[m[32m    public function updateRows(array $columns, array $values, string $condition): bool {[m
+       $len = count($columns);[m
+ [m
+       if ($len == count($values)) {[m
+[36m@@ -62,13 +62,15 @@[m
+           $sql .= $columns[$i] . " = " . $values[$i] . ", ";[m
+         }[m
+         $sql = chop($sql, ", ");[m
+[32m+[m[32m        $sql = "UPDATE " . $this->tableName .[m[41m [m
+[32m+[m[32m        " SET " . $sql .[m[41m [m
+[32m+[m[32m        " WHERE " . $condition;[m
+[32m+[m[32m        $result = $this->conn->query($sql);[m
+[32m+[m[32m        return $result;[m
+[32m+[m[32m      }[m
+[32m+[m[32m      else {[m
+[32m+[m[32m        return false;[m
+       }[m
+[31m-[m
+[31m-      $sql = "UPDATE " . $this->tableName . [m
+[31m-      " SET " . $sql . [m
+[31m-      "WHERE " . $condition;[m
+[31m-      $result = $this->conn->query($sql);[m
+[31m-      return $result;[m
+     }[m
+ [m
+   	private function prepareInsert(): string {[m
+[1mdiff --git a/code/php/classes/GLOBAL_CONSTANT.php b/code/php/classes/GLOBAL_CONSTANT.php[m
+[1mindex 2762101..e19a00e 100644[m
+[1m--- a/code/php/classes/GLOBAL_CONSTANT.php[m
+[1m+++ b/code/php/classes/GLOBAL_CONSTANT.php[m
+[36m@@ -20,6 +20,7 @@[m
+   define("MONEY_UNIT", "$");[m
+ [m
+   // define other value[m
+[32m+[m[32m  define("VALUE_NUM", 1.1);[m
+   define("MY_TRUE", 1);[m
+   define("MY_FALSE", 0);[m
+  ?>[m
+\ No newline at end of file[m
+[1mdiff --git a/code/php/classes/Menu.php b/code/php/classes/Menu.php[m
+[1mindex 918da07..947f687 100644[m
+[1m--- a/code/php/classes/Menu.php[m
+[1m+++ b/code/php/classes/Menu.php[m
+[36m@@ -15,7 +15,7 @@[m
+     private $createAt;[m
+ [m
+     public function __construct(int $adminId, string $name, string $description, [m
+[31m-    	string $menuImg, int $id = 0, bool $isActive = true, float $valueNum = 0,[m
+[32m+[m[41m    [m	[32mstring $menuImg, int $id = 0, bool $isActive = true, float $valueNum = VALUE_NUM,[m
+     	string $valueUnit = MONEY_UNIT, $createAt = "") {[m
+ [m
+     	$this->id = $id;[m
+[36m@@ -36,9 +36,9 @@[m
+     	  // change is_active's value of all rows to false[m
+     	  $condition = COL_IS_ACTIVE . " = " . MY_TRUE;[m
+     	  $db = new Database();[m
+[31m-    	  $db->toTable($db->tableMenu)->updateRow([COL_IS_ACTIVE], [MY_FALSE], $condition);[m
+[32m+[m[41m    [m	[32m  $db->toTable($db->tableMenu)->updateRows([COL_IS_ACTIVE], [MY_FALSE], $condition);[m
+ [m
+[31m-    	  // insert new menu (price = 0) to table menu[m
+[32m+[m[41m    [m	[32m  // insert new row (price = VALUE_NUM) to table menu[m
+     	  $this->createAt = date("y-m-d h:i:s");[m
+ [m
+     	  $details = $this->createDetails();[m
+[36m@@ -50,7 +50,7 @@[m
+     	}[m
+     }[m
+ [m
+[31m-   	// check rule: menu's name is unique[m
+[32m+[m[41m   [m	[32m// check rule: menu's name must be unique[m
+     private function checkUniqueName(): bool {[m
+     	$name = $this->name;[m
+     	$condition = COL_NAME . " = '" . $name . "'";[m
+[36m@@ -64,7 +64,7 @@[m
+       }[m
+     }[m
+ [m
+[31m-    // check rule: menu must being active to order[m
+[32m+[m[32m    // check rule: this menu must being active to order[m
+     public static function checkIsActive(int $menuId): bool {[m
+       $db = new Database();[m
+       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);[m
+[36m@@ -83,14 +83,17 @@[m
+       }[m
+     }[m
+ [m
+[31m-    // check the price of menu[m
+[31m-    public static function checkValueNum(int $menuId): int {[m
+[32m+[m[32m    // check the price of active menu[m
+[32m+[m[32m    public static function checkValueNumOfActiveMenu(int $menuId): float {[m
+       $db = new Database();[m
+       $result = $db->toTable($db->tableMenu)->getRows(COL_ID . " = " . $menuId);[m
+       if ($result->num_rows == 1) {[m
+       	$row = $result->fetch_object();[m
+[31m-      	$valueNum = $row->value_num;[m
+[31m-      	return $valueNum;[m
+[32m+[m[41m      [m	[32mif ($row->is_active) {[m
+[32m+[m[41m      [m		[32m$valueNum = $row->value_num;[m
+[32m+[m[41m      [m		[32mreturn $valueNum;[m
+[32m+[m[41m      [m	[32m}[m
+[32m+[m[41m      [m	[32melse return 0;[m
+       }[m
+       else {[m
+       	return 0;[m
+[1mdiff --git a/code/php/classes/Order.php b/code/php/classes/Order.php[m
+[1mindex 0b6b7e3..11bbd2f 100644[m
+[1m--- a/code/php/classes/Order.php[m
+[1m+++ b/code/php/classes/Order.php[m
+[36m@@ -16,7 +16,7 @@[m
+     private $orderAt;[m
+ [m
+     public function __construct(int $numOfPeo, string $address, string $note, string $deadline, [m
+[31m-    	int $id = 0, int $customerId = 0, int $menuId = 0, float $valueNum = 0, [m
+[32m+[m[41m    [m	[32mint $id = 0, int $customerId = 0, int $menuId = 0, float $valueNum = VALUE_NUM,[m[41m [m
+     	string $valueUnit = MONEY_UNIT, string $orderAt = "") { [m
+ [m
+     	$this->id = $id;[m
+[36m@@ -33,12 +33,12 @@[m
+ [m
+     // insert data to table customer_order[m
+     public function createOrder(Customer $customer, int $menuId): bool {[m
+[32m+[m
+       // get customer's id[m
+[31m-      $customerId;[m
+       $result1 = $customer->getCustomer();[m
+       if ($result1->num_rows == 1) {[m
+         $row = $result1->fetch_object();[m
+[31m-        $customerId = $row->id;[m
+[32m+[m[32m        $this->customerId = $row->id;[m
+       }[m
+       else {[m
+       	return false;[m
+[36m@@ -46,10 +46,10 @@[m
+ [m
+       // get menu's id which is active[m
+       $result2 = Menu::checkIsActive($menuId);[m
+[32m+[m
+       if ($result2) {[m
+[31m-      	$this->customerId = $customerId;[m
+       	$this->menuId = $menuId;[m
+[31m-      	$this->valueNum = Menu::checkValueNum($menuId)*$this->numOfPeo;[m
+[32m+[m[41m      [m	[32m$this->valueNum = Menu::checkValueNumOfActiveMenu($menuId)*$this->numOfPeo;[m
+       	$this->orderAt = date("y-m-d h:i:s");[m
+ [m
+         // insert data to table customer_order[m
+[1mdiff --git a/code/php/classes/devHungClass.php b/code/php/classes/devHungClass.php[m
+[1mindex 93c6813..d128a0b 100644[m
+[1m--- a/code/php/classes/devHungClass.php[m
+[1m+++ b/code/php/classes/devHungClass.php[m
+[36m@@ -11,12 +11,27 @@[m
+   // $customer = new Customer("Hung", "0973593797");[m
+   // $customer->createCustomer();[m
+ [m
+[31m-  // $order = new Order(5, "address1", "note1", "2121-12-12 12:12:12");[m
+[31m-  // $order->createOrder(new Customer("hung", "0973593797"), 1);[m
+[32m+[m[32m  // $menu = new Menu(1, "menu11", '', "img11");[m
+[32m+[m[32m  // $menu->createMenu();[m
+ [m
+[31m-	// $db = new Database();[m
+[31m-	// $db->toTable($db->tableCustomer)->updateRow(['name'], ["'Hung'"], "id = '38'");[m
+[32m+[m[32m  // $order = new Order(100, "address11", "note11", "2021-04-02 21:00:00");[m
+[32m+[m[32m  // $order->createOrder(new Customer("dung", "0962859206"), 11);[m
+ [m
+[31m-	// $menu = new Menu(2, "menu2", '', "img2");[m
+[31m-	// $menu->createMenu();[m
+[32m+[m[32m  // $db = new Database();[m
+[32m+[m[32m  // $condition = COL_IS_ACTIVE . " = " . MY_TRUE;[m
+[32m+[m[32m  // $result = $db->toTable($db->tableMenu)->updateRows([COL_IS_ACTIVE], [MY_FALSE], $condition);[m
+[32m+[m[32m  // echo var_dump($result);[m
+[32m+[m
+[32m+[m[32m  // $sql = "UPDATE menu SET " .[m[41m [m
+[32m+[m[32m  // COL_IS_ACTIVE . " = " . MY_TRUE .[m[41m [m
+[32m+[m[32m  // " WHERE " . COL_IS_ACTIVE . " = " . MY_FALSE;[m
+[32m+[m[32m  // $result = $db->conn->query($sql);[m
+[32m+[m[32m  // echo var_dump($result);[m
+[32m+[m
+[32m+[m[32m  // $db = new Database();[m
+[32m+[m[32m  // $condition = COL_NAME . " = " . "'Hung'";[m
+[32m+[m[32m  // $result = $db->toTable($db->tableCustomer)->updateRows([COL_NAME], ["'seal'"], $condition);[m[41m  [m
+[32m+[m[32m  // echo var_dump($result);[m
+[32m+[m
+[32m+[m[41m  [m
+  ?>[m
+\ No newline at end of file[m
+[1mdiff --git a/phan_tich/classes/classes.drawio b/phan_tich/classes/classes.drawio[m
+[1mindex 3b1204a..ba7f94c 100644[m
+[1m--- a/phan_tich/classes/classes.drawio[m
+[1m+++ b/phan_tich/classes/classes.drawio[m
+[36m@@ -1 +1 @@[m
+[31m-<mxfile host="Electron" modified="2021-03-31T17:12:31.941Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/14.5.1 Chrome/89.0.4389.82 Electron/12.0.1 Safari/537.36" etag="SoCw6F-ufPa9-hQXiea3" version="14.5.1" type="device"><diagram id="ibbRtkqQK8TwOqvRTWib" name="Page-1">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</diagram></mxfile>[m
+\ No newline at end of file[m
+[32m+[m[32m<mxfile host="Electron" modified="2021-04-02T06:09:57.076Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/14.5.1 Chrome/89.0.4389.82 Electron/12.0.1 Safari/537.36" etag="069vfb2K_YxXqVwl27li" version="14.5.1" type="device"><diagram id="ibbRtkqQK8TwOqvRTWib" name="Page-1">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</diagram></mxfile>[m
+\ No newline at end of file[m
